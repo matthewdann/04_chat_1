@@ -56,9 +56,9 @@ function deleteMessage(key) {
 function displayMessage(key, msg) {
   let html = `
         <div class=${key}>
-            <p>${msg.userName}</p>
-            <p>${msg.message}</p>
-            <p>${msg.timeStamp}</p>
+            <p class='user-name'>${msg.userName}</p>
+            <p class='message'>${msg.message}</p>
+            <p class='time-stamp'>${msg.timeStamp}</p>
             <button class="delete-btn" data-key="${key}">削除</button>
         </div>  
     `;
@@ -89,4 +89,15 @@ onChildRemoved(dbRef, function (data) {
   const key = data.key;
   // 対応する要素を削除
   $(`.${key}`).remove();
+});
+
+// すべてのメッセージを削除する関数
+function clearAllMessages() {
+  // データベース内の"chat"ノード以下のすべてのデータを削除
+  remove(ref(db, "chat"));
+}
+
+// #clear-btnがクリックされたらすべてのメッセージを削除
+$('#clear-btn').on('click', function () {
+  clearAllMessages();
 });
