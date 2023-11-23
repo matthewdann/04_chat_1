@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase
 import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved }
   from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
 
-import { getFormattedDateTime, scrollToBottom } from "./functions.js";
+import { getFormattedDateTime, scrollToBottom, getBot } from "./functions.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = config;
@@ -13,32 +13,44 @@ const dbRef = ref(db, "chat"); //RealtimeDB内の"chat"を使う
 
 // firebaseにデータを送る関数
 function sendMessage() {
-  const userName = $('#user-name').val();
-  let message = $('#message').val();
+  const nickname = $('#nickname').val();
+  let text = $('#text').val();
   const timeStamp = getFormattedDateTime();
 
   // 改行を<br>に変換
-  message = message.replace(/\n/g, '<br>');
+  text = text.replace(/\n/g, '<br>');
 
   const msg = {
-    userName: userName,
-    message: message,
+    nickname: nickname,
+    text: text,
     timeStamp: timeStamp,
   };
 
   const newPostRef = push(dbRef);
   set(newPostRef, msg);
 
-  $('#message').val(''); // メッセージを送信した後、入力欄を空にする
+  // チャットボットの応答を取得
+  const bot = getBot();
+  const botMsg = {
+    nickname: bot.name,
+    text: bot.text,
+    // timeStamp: getFormattedDateTime(),
+  };
+
+  // チャットボットの応答を表示
+  const botPostRef = push(dbRef);
+  set(botPostRef, botMsg);
+
+  $('#text').val(''); // メッセージを送信した後、入力欄を空にする
 }
 
-// 送信ボタンがクリックされたらメッセージを送信
-$('#send-button').on('click', function () {
-  sendMessage();
-});
+// // 送信ボタンがクリックされたらメッセージを送信
+// $('#send-button').on('click', function () {
+//   sendMessage();
+// });
   
 // Enterキーが押され、かつShiftキーが押されていない場合にメッセージを送信
-$('#message').on('keypress', function (event) {
+$('#text').on('keypress', function (event) {
   const textareaValue = $(this).val();
   if (event.key === 'Enter' && !event.shiftKey) {
     event.preventDefault();
@@ -55,16 +67,15 @@ function deleteMessage(key) {
 // メッセージ表示関数
 function displayMessage(key, msg) {
   let html = `
-        <div class=${key}>
-            <p class='user-name'>${msg.userName}</p>
-            <p class='message'>${msg.message}</p>
-            <p class='time-stamp'>${msg.timeStamp}</p>
-            <button class="delete-btn" data-key="${key}">削除</button>
-        </div>  
-    `;
+    <div class="${key}">
+      <p class="nickname">${msg.nickname}</p>
+      <p class="text">${msg.text}</p>
+      ${msg.timeStamp ? `<p class="time-stamp">${msg.timeStamp}</p>` : ''}
+      <button class="delete-btn" data-key="${key}">削除</button>
+    </div>  
+  `;
 
   $('#display-area').append(html);
-  // $('#display-area').prepend(html);
 
   // 削除ボタンのクリックイベントを設定
   $(`.${key} .delete-btn`).on('click', function () {

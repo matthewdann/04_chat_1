@@ -8,14 +8,14 @@ h1 {
   font-size: 20px;
 }
 
-input {
+#nickname {
   width: 500px;
   padding: 10px;
   display: block;
   margin: 0 auto 32px;
 }
 
-textarea {
+#text {
   width: 500px;
   height: 100px;
   padding: 10px;
