@@ -66,12 +66,19 @@ function deleteMessage(key) {
 
 // メッセージ表示関数
 function displayMessage(key, msg) {
+  console.log('msg.nickname', msg.nickname);
+  console.log('getBot().name', getBot().name);
+  const isBotMessage = msg.nickname === getBot().name;
+  const alignmentClass = isBotMessage ? 'bot-message' : 'user-message'; // メッセージのクラスを設定
+
   let html = `
-    <div class="${key}">
-      <p class="nickname">${msg.nickname}</p>
-      <p class="text">${msg.text}</p>
-      ${msg.timeStamp ? `<p class="time-stamp">${msg.timeStamp}</p>` : ''}
-      <button class="delete-btn" data-key="${key}">削除</button>
+    <div class="${key} message-container">
+      <div class="${alignmentClass}">
+        <p class="nickname">${msg.nickname}</p>
+        <p class="text">${msg.text}</p>
+        ${msg.timeStamp ? `<p class="time-stamp">${msg.timeStamp}</p>` : ''}
+        <button class="delete-btn" data-key="${key}">削除</button>
+      </div>
     </div>  
   `;
 
@@ -82,6 +89,9 @@ function displayMessage(key, msg) {
     const keyToDelete = $(this).data('key');
     deleteMessage(keyToDelete);
   });
+
+  // 新しいメッセージが表示されるときに表示領域を最下部にスクロール
+  scrollToBottom();
 }
 
 // 最初にデータ取得＆onSnapshotでリアルタイムにデータを取得
@@ -90,9 +100,6 @@ onChildAdded(dbRef, function (data) {
   const key = data.key;
 
   displayMessage(key, msg);
-
-  // 新しいメッセージが表示されるときに表示領域を最下部にスクロール
-  scrollToBottom();
 });
 
 // メッセージ削除時のイベント
